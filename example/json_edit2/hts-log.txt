@@ -1,0 +1,21 @@
+HTTrack3.48-13+htsswf+htsjava launched on Thu, 27 Oct 2016 02:13:39 at http://www.qqe2.com/ +*.png +*.gif +*.jpg +*.jpeg +*.css +*.js -ad.doubleclick.net/* -mime:application/foobar
+(winhttrack -qwr3C2%Ps2u1%s%uN0%I0p3DaK0c8H0%kf2A25000%f#f -F "Mozilla/4.5 (compatible; HTTrack 3.0x; Windows 98)" -%F "<!-- Mirrored from %s%s by HTTrack Website Copier/3.x [XR&CO'2014], %s -->" -%l "en, *" http://www.qqe2.com/ -O1 "J:\win7\app_workspace\WinHTTrack Websit Copier\NetBean\json_edit2" +*.png +*.gif +*.jpg +*.jpeg +*.css +*.js -ad.doubleclick.net/* -mime:application/foobar )
+
+Information, Warnings and Errors reported for this mirror:
+note:	the hts-log.txt file, and hts-cache folder, may contain sensitive information,
+	such as username/password authentication for websites mirrored in this project
+	do not share these files/folders if you want these information to remain private
+
+02:13:49	Warning: 	file not stored in cache due to bogus state (incomplete type with OK (200), size 0): eclick.baidu.com/fcb.jpg?jk={jk}&dt={dt}&rnd={rnd}
+02:13:49	Error: 	"Not Found" (404) at link www.qqe2.com/Ctrl-/ (from www.qqe2.com/asset/ace/ace.js)
+02:13:49	Error: 	"Not Found" (404) at link www.qqe2.com/Command-/ (from www.qqe2.com/asset/ace/ace.js)
+02:13:49	Error: 	"Not Found" (404) at link www.qqe2.com/Ctrl-Shift-/ (from www.qqe2.com/asset/ace/ace.js)
+02:13:49	Error: 	"Not Found" (404) at link www.qqe2.com/Command-Shift-/ (from www.qqe2.com/asset/ace/ace.js)
+02:13:49	Error: 	"Not Found" (404) at link www.qqe2.com/GET (from www.qqe2.com/asset/ace/ace.js)
+02:13:49	Error: 	"Not Found" (404) at link www.qqe2.com/ace/worker/worker.js (from www.qqe2.com/asset/ace/ace.js)
+02:13:49	Error: 	"Not Found" (404) at link www.qqe2.com/WebKit/ (from www.qqe2.com/asset/ace/ace.js)
+02:13:49	Error: 	"Not Found" (404) at link www.qqe2.com/Chrome/ (from www.qqe2.com/asset/ace/ace.js)
+02:13:49	Error: 	"Not Found" (404) at link www.qqe2.com/noexpire/img/2.0.1/xuanfu_close.png (from cpro.baidustatic.com/cpro/ui/c.js)
+
+HTTrack Website Copier/3.48-13 mirror complete in 10 seconds : 25 links scanned, 15 files written (625952 bytes overall) [245939 bytes received at 24593 bytes/sec], 607442 bytes transferred using HTTP compression in 10 files, ratio 34%, 4.1 requests per connection
+(9 errors, 1 warnings, 0 messages)

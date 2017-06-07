@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MDwiki</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="fragment" content="!">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.png" />
+    <meta charset="UTF-8">
+	<title>Marked in the browser</title>
+	<!--  -->
+	<link href="toc/style/github-bf51422f4bb36427d391e4b75a1daa083c2d840e.css" media="all" rel="stylesheet" type="text/css"/>
+	<link href="toc/style/github2-d731afd4f624c99a4b19ad69f3083cd6d02b81d5.css" media="all" rel="stylesheet" type="text/css"/>
+	<!-- -->
+	<link href="toc/css/zTreeStyle/zTreeStyle.css" media="all" rel="stylesheet" type="text/css"/>
+	<!-- for editor.md -->
+	<link rel="stylesheet" href="css/from_editor_md/style.css" />
+	<link rel="stylesheet" href="css/from_editor_md/editormd.preview.css" />
+	<link rel="shortcut icon" href="picture/from_editor_md/favicon.ico" type="image/x-icon" />
+	<!-- for editor.md end -->
+	
+	<script type="text/javascript">
+		var pageSetting = {
+			'scrollTime'		:		3000,
+			'markdown_header'	:		{},
+			'debug'				:		true
+		};
+	</script>
+	<script src="lib/marked.js"></script>
+	<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+	<!--<script type="text/javascript" src="js/jquery.ztree.core-3.5.js"></script>-->
+	<script type="text/javascript" src="toc/js/jquery.ztree.all-3.5.min.js"></script>
+	<script type="text/javascript" src="toc/js/toc_conf.js"></script>
+	<script type="text/javascript" src="toc/js/ztree_toc.js"></script>
+	<script type="text/javascript" src="toc/js/all_toc.js"></script>
+	<script type="text/javascript" src="toc/js/all_toc_without_header.js"></script>
+	
+	<!-- for editor.md -->
+	<!--<script src="js/from_editor_md/jquery.min.js"></script>-->
+	<script src="js/from_editor_md/marked.min.js"></script>
+	<script src="js/from_editor_md/prettify.min.js"></script>
+	<script src="js/from_editor_md/raphael.min.js"></script>
+	<script src="js/from_editor_md/underscore.min.js"></script>
+	<script src="js/from_editor_md/sequence-diagram.min.js"></script>
+	<script src="js/from_editor_md/flowchart.min.js"></script>
+	<script src="js/from_editor_md/jquery.flowchart.min.js"></script>
+	<script src="js/from_editor_md/editormd.js"></script>
+	<!-- for editor.md end-->
+	<script type="text/javascript">	
+		$(function(){
+			//document.getElementById("thisPage").href=window.location.href;
+			//一、分析地址信息
+			var addressInfo=getAddressInfo();
+			document.title=addressInfo.title;
+			var type=addressInfo.url.match(/(?=.*)\..*/);
+			//二、下载文档并渲染
+			$.ajax({
+				'url'		:	addressInfo.url,
+				'dataType'	:	'text'
+			/*下载成功*/	
+			}).done(function(data){
+				if(".txt"==type)data="```\n"+data+"```";
+				//1.生成html代码，并渲染
+				createHtml(data);
+				//2.生成左侧目录树
+				var tree=createTree();
+				//3.分析地址信息，滚动到指定的位置
+				scroll(addressInfo);
+			//下载失败
+			}).fail(function(){
+				console.error('下载文件失败!');
+			});
+			//三、生成全局目录
+			create_all_toc(addressInfo);
+			
+		});
+		function create_all_toc(addressInfo){
+			var headerData;
+			var url=addressInfo.url.replace(/\/.*?(\.md|\.txt)$/,'/mdhead.json');
+			$.ajax({
+				'url'		:	url,
+				'dataType'	:	'text',
+				'async'		:	false
+			}).done(
+				function(data){
+					headerData = eval("("+data+")");
+				}
+			).fail(
+				function(){
+					
+				}
+			);
+			
+			var css_conf = eval(markdown_panel_style);
+			$('#readme').css(css_conf)
+
+			var conf = eval(jquery_ztree_toc_opts);
+			conf.data=headerData;
+			$('#tree2').ztree_all_toc(conf);
+			$('#tree3').ztree_all_toc_without_header(conf);
+		}
+		
+		//分析地址信息，滚动到指定的位置
+		function scroll(addressInfo){
+			if(''!=addressInfo.id){
+				$('html, body').animate({  
+					scrollTop: $(treeNode._url).offset().top  
+				}, pageSetting.scrollTime); 
+				return;
+			}
+			if(''!=addressInfo.content){
+				$(jquery_ztree_toc_opts.documment_selector).find(":header").each(function(index,element){
+					if(element.innerText.indexOf(addressInfo.content)!=-1){
+						$('html, body').animate({  
+							scrollTop: $(element).offset().top  
+						}, pageSetting.scrollTime);
+						return false;
+					}
+				});
+			}
+		}
+		
+		//生成html代码，并渲染
+		function createHtml(data){
+			var create=editormd.markdownToHTML("test-editormd-view", {
+				markdown        : data ,//+ "\r\n" + $("#append-test").text(),
+				//htmlDecode      : true,       // 开启 HTML 标签解析，为了安全性，默认不开启
+				htmlDecode      : "style,script,iframe",  // you can filter tags decode
+				//toc             : false,
+				tocm            : true,    // Using [TOCM]
+				//tocContainer    : "#custom-toc-container", // 自定义 ToC 容器层
+				//gfm             : false,
+				//tocDropdown     : true,
+				// markdownSourceCode : true, // 是否保留 Markdown 源码，即是否删除保存源码的 Textarea 标签
+				emoji           : true,
+				taskList        : true,
+				tex             : true,  // 默认不解析
+				flowChart       : true,  // 默认不解析
+				sequenceDiagram : true,  // 默认不解析
+			});
+			return create;
+		}
+		
+		//生成目录树
+		function createTree(){
+			var css_conf = eval(markdown_panel_style);
+			$('#readme').css(css_conf)
+
+			var conf = eval(jquery_ztree_toc_opts);
+			return $('#tree').ztree_toc(conf);
+		}
+		
+		//解析地址信息
+		function getAddressInfo(){
+			var href=window.location.href;
+			//var pattern=/.*?\.html#(.*?)#.*|.*?\.html#(.*)/;
+			var pattern=/.*?\.html#(.*?(\.md|\.txt)).*/;
+			var url=href.match(pattern)[1];
+			var id="";//markdown文档的修改会导致id变化，所有采用匹配的方式，如果标题没有太大修改则可能会匹配到
+			pattern=/.*#(.*?)\.cont.*/;
+			var match = href.match(pattern);match=null==match?[]:match;
+			var content=match.length>1?match[1]:"课程的简介";
+			pattern=/.*\/(.*?(\.md|\.txt)).*/;
+			match= href.match(pattern);
+			var title=match[1];
+			if(pageSetting.debug)console.log("content:"+content);
+			return {
+				"url"		:		url,
+				"id"		:		id,//指定跳转id节点
+				"content"	:		content,//指定跳转的标题
+				'title'		:		title
+			};
+		}
+		
+		//跳转到头部
+		function gotoHead(){
+			$('html, body').animate({  
+				scrollTop: $("#thisPage").offset().top  
+			}, pageSetting.scrollTime);
+		}
+		
+		var ToolBar = {
+			test	:	function(exp){
+						},
+			all_head_full_screen
+					:	function(element){
+							if(element.checked){
+								$("#tree2").css({width:"80%"});
+								$("#tree").css({width:"80%"});
+								$("#tree3").css({display:"80%"});
+								$("#readme").css({display:"none"});
+							}
+							else{
+								$("#tree2").css({width:"326px"});
+								$("#tree").css({width:"326px"});
+								$("#tree3").css({display:"326px"});
+								$("#readme").css({display:"block"});
+							}
+						},
+			showHead:	function(){
+							$("#tree").css({display:"block"});
+							$("#tree2").css({display:"none"});
+							$("#tree3").css({display:"none"});
+						},
+			showAllHead
+					:	function(){
+							$("#tree2").css({display:"block"});
+							$("#tree").css({display:"none"});
+							$("#tree3").css({display:"none"});
+						},
+			showDir	:	function(){
+							$("#tree2").css({display:"none"});
+							$("#tree").css({display:"none"});
+							$("#tree3").css({display:"block"});
+						}
+		};
+		var setting={
+			'tree_expend':'60%'
+		};
+		function test(){
+			var exp1="[['#tree',{'width':'${tree_expend}'}],['#tree2',{''}]]";//[[筛选器，样式],[筛选器，样式]]
+			ToolBar.test();
+		}
+	</script>
+</head>
+<body>
+	<a style="position:fixed;top:20px;right:10px;font-size:20px;color:blue;" href="javascript:void(0)" onclick="gotoHead()">top</a>
+	<span style="position:fixed;top:60px;right:10px;">head<input type="radio" name="treeType"  onclick="ToolBar.showHead()"/></span>
+	<span style="position:fixed;top:80px;right:10px;">目录<input type="radio" name="treeType"  checked="true" onclick="ToolBar.showDir()" /></span>
+	<span style="position:fixed;top:100px;right:10px;">all_head<input type="radio" name="treeType"  onclick="ToolBar.showAllHead()"/></span>
+	<span style="position:fixed;top:120px;right:10px;">目录全屏<input type="checkbox" name="" onclick="ToolBar.all_head_full_screen(this)"/></span>
+	<div id="layout">
+		<div style='width:25%;'>
+			<ul id="tree" class="ztree" style='width:100%;display:none'>
+			</ul>
+			<ul id="tree2" class="ztree" style='width:100%;display:none'>
+			</ul>
+			<ul id="tree3" class="ztree" style='width:100%;'>
+			</ul>
+		</div>
+        <div id='readme' style='width:70%;margin-left:20%;'>
+          	<article class='markdown-body' id="markdown-body">
+				<span><a href="javascript:void(0);" id="thisPage">本页地址</a></span>
+				<div id="test-editormd-view"></div>
+          	</article>
+        </div>
+	</div>
+</body>
+</html>
+

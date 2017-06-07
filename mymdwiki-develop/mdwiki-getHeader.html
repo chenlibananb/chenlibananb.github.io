@@ -1,0 +1,76 @@
+﻿<html>
+<head>
+	<meta charset="UTF-8">
+	<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="js/json2.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			var headData=getMDwikiHead(window.location.href.replace(/\/[^\/]*?.html.*/,'/md/mdinfo.json'));
+			var headDataStr=JSON.stringify(headData);
+			document.getElementById("headdata").value=headDataStr;
+		});
+		
+		function getMDwikiHead(url,parentPath,folderName){
+			var result={"mdlist":[],"folderlist":[],"folderName":null==folderName?"/":folderName};
+			if(null==folderName)result.url=url;//第一个添加url信息
+			if(null!=parentPath)result.path=(parentPath=="/"?"":parentPath)+"/"+folderName;
+			if(null==parentPath)result.path="/";
+			var mdinfo={};
+			$.ajax({
+				'url'		:	url,
+				'dataType'	:	'text',
+				'async'		:	false
+			}).done(
+				function(data){
+					
+					mdinfo = eval("("+data+")");
+				}
+			).fail(
+				function(){
+					
+				}
+			);
+			for(var i=0;i<mdinfo.markdownlist.length;i++){
+				var mdUrl=url.replace("mdinfo.json",mdinfo.markdownlist[i].name);
+				$.ajax({
+					'url'		:	mdUrl,
+					'dataType'	:	'text',
+					'async'		:	false
+				}).done(
+					function(markdownText){
+						result['mdlist'][result['mdlist'].length]={"name":mdinfo.markdownlist[i].name,"headerlist":Tool['getHeaderList'](markdownText)};
+					}
+				).fail(function(){
+					
+				});
+			}
+			for(var i=0;i<mdinfo.folder.length;i++){
+				if(!mdinfo.folder[i].hasmarkdownfile)continue;
+				var mdinfoUrl=url.replace("mdinfo.json",mdinfo.folder[i].name+"/mdinfo.json");
+				result['folderlist'][result['folderlist'].length]=getMDwikiHead(mdinfoUrl,result['path'],mdinfo.folder[i].name);
+			}
+			return result;
+		}
+		
+		
+		var Tool = {
+			//从markdownText中解析出head，返回数组
+			'getHeaderList'		:		function(markdownText){
+				var result=[];
+				var pattern=/(^|\n|\r\n) *?#+? +?.*?(?=(\n|\r\n|$))/g;
+				var match=markdownText.match(pattern);
+				if(typeof(match)=='undefined')return result;
+				if(null==match)return result;
+				for(var i=0;i<match.length;i++){
+					result[result.length]=match[i].replace("\r\n","").replace("\n","").replace(/^ *#/,"#");
+				}
+				return result;
+			}
+		};
+		//Tool.getHeaderList("# Heading1\n  ## Heading2\nasdfs#adf\n### Heading3");
+	</script>
+</head>
+<body>
+<textarea id="headdata" style="width:800px;height:400px"></textarea>
+</body>
+</html>
